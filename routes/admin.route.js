@@ -18,4 +18,13 @@ module.exports = (app) => {
         app.post("/api/v1/admin/AddHelpDesk", authJwt.verifyToken, auth.AddHelpDesk);
         app.get("/api/v1/admin/getHelpDesk", auth.getHelpDesk);
         app.delete("/api/v1/admin/HelpDesk", [authJwt.verifyToken], auth.deleteHelpDesk);
+        app.post("/api/v1/admin/AddLobby", authJwt.verifyToken, auth.AddLobby);
+        app.get("/api/v1/admin/allLobby", auth.getLobbys);
+        app.put("/api/v1/admin/Lobby/:id", authJwt.verifyToken, auth.activeBlockLobby);
+        app.delete("/api/v1/admin/Lobby/:id", [authJwt.verifyToken], auth.deleteLobby);
+        app.post("/api/v1/static/faq/createFaq", authJwt.verifyToken, auth.createFaq);
+        app.put("/api/v1/static/faq/:id", authJwt.verifyToken, auth.updateFaq);
+        app.delete("/api/v1/static/faq/:id", authJwt.verifyToken, auth.deleteFaq);
+        app.get("/api/v1/static/faq/All", auth.getAllFaqs);
+        app.get("/api/v1/static/faq/:id", auth.getFaqById); 
 }

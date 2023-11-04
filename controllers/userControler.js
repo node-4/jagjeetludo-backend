@@ -2,6 +2,7 @@ const userModel = require("../models/userModel");
 const contest = require("../models/contest");
 const notification = require("../models/notification");
 const transactionModel = require("../models/transaction");
+const lobby = require("../models/lobby");
 const jwt = require("jsonwebtoken");
 exports.socialLogin = async (req, res) => {
         try {
@@ -383,6 +384,129 @@ exports.usedRefferCode = async (req, res) => {
                 return res.status(500).json({ message: "Server error" });
         }
 };
+exports.getlobby = async (req, res) => {
+        try {
+                if (req.query.noOfuser = !(null || undefined)) {
+                        const categories = await lobby.find({ noOfuser: req.body.noOfuser, status: "ACTIVE" })
+                        if (categories.length > 0) {
+                                return res.status(201).json({ message: "Lobby Found", status: 200, data: categories, });
+                        }
+                        return res.status(201).json({ message: "Lobby not Found", status: 404, data: {}, });
+                } else {
+                        const categories = await lobby.find({ status: "ACTIVE" })
+                        if (categories.length > 0) {
+                                return res.status(201).json({ message: "Lobby Found", status: 200, data: categories, });
+                        }
+                        return res.status(201).json({ message: "Lobby not Found", status: 404, data: {}, });
+                }
+        } catch (error) {
+                console.error(error);
+                return res.status(500).json({ message: "Server error" });
+        }
+};
+exports.AddContest = async (req, res) => {
+        try {
+                req.body.contestId = await reffralCode();
+                let users = [];
+                users.push(req.user._id)
+                req.body.users = users;
+                const categories = await lobby.findOne({ _id: req.body.lobbyId })
+                if (!categories) {
+                        return res.status(201).json({ message: "Lobby Found", status: 200, data: categories, });
+                }
+                if (req.body.noOfuser == 2) {
+                        req.body.firstPrize = categories.firstPrize;
+                        req.body.entryFee = categories.entryFee;
+                }
+                if (req.body.noOfuser == 3) {
+                        req.body.firstPrize = categories.firstPrize;
+                        req.body.secondPrize = categories.secondPrize;
+                        req.body.entryFee = categories.entryFee;
+                }
+                if (req.body.noOfuser == 4) {
+                        req.body.firstPrize = categories.firstPrize;
+                        req.body.secondPrize = categories.secondPrize;
+                        req.body.thirdPrize = categories.thirdPrize;
+                        req.body.entryFee = categories.entryFee;
+                }
+                const Data = await contest.create(req.body);
+                if (Data) {
+                        const findUser = await userModel.find({ _id: { $ne: req.user._id }, userType: "USER" });
+                        if (findUser.length > 0) {
+                                for (let i = 0; i < findUser.length; i++) {
+                                        const notificationData = await notification.create({ userId: findUser[i]._id, title: "New Contest", body: `New Contest is add contest id ${req.body.contestId}`, type: "CONTEST", status: "ACTIVE", })
+                                }
+                                return res.status(200).json({ status: 200, message: "Contest is add successfully. ", data: Data })
+                        } else {
+                                return res.status(200).json({ status: 200, message: "Contest is add successfully. ", data: Data })
+                        }
+                }
+        } catch (err) {
+                console.log(err);
+                return res.status(501).send({ status: 501, message: "server error.", data: {}, });
+        }
+};
+exports.dailyWinnerContestlist = async (req, res) => {
+        try {
+                const currentDate = new Date();
+                currentDate.setHours(0, 0, 0, 0);
+                const dailyWinners = await contest.find({
+                        winner: req.user._id,
+                        createdAt: { $gte: currentDate },
+                });
+                if (dailyWinners.length === 0) {
+                        return res.status(404).json({ status: 404, message: 'Daily contest winners not found.' });
+                }
+                return res.status(200).json({ status: 200, message: 'Daily contest winners', data: dailyWinners });
+        } catch (error) {
+                console.error(error);
+                return res.status(500).json({ message: 'Internal server error.' });
+        }
+};
+exports.weeklyWinnerContestlist = async (req, res) => {
+        try {
+                const currentDate = new Date();
+                currentDate.setHours(0, 0, 0, 0);
+                const lastWeekDate = new Date(currentDate);
+                lastWeekDate.setDate(currentDate.getDate() - 7);
+                const weeklyWinners = await contest.find({
+                        winner: req.user._id,
+                        createdAt: { $gte: lastWeekDate, $lte: currentDate },
+                });
+
+                if (weeklyWinners.length === 0) {
+                        return res.status(404).json({ status: 404, message: 'Weekly contest winners not found.' });
+                }
+
+                return res.status(200).json({ status: 200, message: 'Weekly contest winners', data: weeklyWinners });
+        } catch (error) {
+                console.error(error);
+                return res.status(500).json({ message: 'Internal server error.' });
+        }
+};
+exports.monthlyWinnerContestlist = async (req, res) => {
+        try {
+                const currentDate = new Date();
+                currentDate.setHours(0, 0, 0, 0);
+                const lastMonthDate = new Date(currentDate);
+                lastMonthDate.setMonth(currentDate.getMonth() - 1);
+                const monthlyWinners = await contest.find({
+                        winner: req.user._id,
+                        createdAt: { $gte: lastMonthDate, $lte: currentDate },
+                });
+
+                if (monthlyWinners.length === 0) {
+                        return res.status(404).json({ status: 404, message: 'Monthly contest winners not found.' });
+                }
+
+                return res.status(200).json({ status: 200, message: 'Monthly contest winners', data: monthlyWinners });
+        } catch (error) {
+                console.error(error);
+                return res.status(500).json({ message: 'Internal server error.' });
+        }
+};
+
+
 const reffralCode = async () => {
         var digits = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
         let OTP = '';

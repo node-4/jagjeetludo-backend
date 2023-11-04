@@ -41,6 +41,10 @@ var notificationModel = new Schema({
                 type: Number,
                 default: 0
         },
+        type: {
+                type: String,
+                enum: ["CLASSIC", "RUSH"],
+        },
         status: {
                 type: String,
                 enum: ["ACTIVE", "BLOCKED", "COMPLETE"],

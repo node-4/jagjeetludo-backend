@@ -76,7 +76,6 @@ var userSchema = new schema({
         },
         language: {
                 type: String,
-                enum: ["Hindi", "English"],
         },
         music: {
                 type: Boolean,
@@ -88,7 +87,7 @@ var userSchema = new schema({
         },
         userType: {
                 type: String,
-                enum: ["USER", "ADMIN"],
+                enum: ["USER", "ADMIN","GUEST",],
                 default: "USER"
         },
 },

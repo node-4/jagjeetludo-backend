@@ -19,4 +19,9 @@ module.exports = (app) => {
         app.put("/api/v1/user/updateSound", [authJwt.verifyToken], auth.updateSound);
         app.put("/api/v1/user/updateLanguage", [authJwt.verifyToken], auth.updateLanguage);
         app.post("/api/v1/user/used/RefferCode", [authJwt.verifyToken], auth.usedRefferCode);
+        app.post("/api/v1/user/AddContest", authJwt.verifyToken, auth.AddContest);
+        app.get("/api/v1/user/lobby/getlobby", auth.getlobby);
+        app.get("/api/v1/user/winner/dailyWinnerContestlist", [authJwt.verifyToken], auth.dailyWinnerContestlist);
+        app.get("/api/v1/user/weeklyWinnerContestlist", [authJwt.verifyToken], auth.weeklyWinnerContestlist);
+        app.get("/api/v1/user/monthlyWinnerContestlist", [authJwt.verifyToken], auth.monthlyWinnerContestlist);
 }

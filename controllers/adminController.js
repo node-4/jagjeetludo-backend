@@ -5,6 +5,8 @@ const contest = require("../models/contest");
 const notification = require("../models/notification");
 const helpDesk = require("../models/helpDesk");
 const howToPlay = require("../models/howPlay");
+const lobby = require("../models/lobby");
+const Faq = require('../models/faq')
 
 exports.registration = async (req, res) => {
         const { mobileNumber, email } = req.body;
@@ -260,6 +262,124 @@ exports.deleteHelpDesk = async (req, res) => {
                 }
         } catch (err) {
                 return res.status(500).send({ msg: "internal server error ", error: err.message, });
+        }
+};
+exports.AddLobby = async (req, res) => {
+        try {
+                const findData = await lobby.findOne({ entryFee: req.body.entryFee, noOfuser: req.body.noOfuser });
+                if (findData) {
+                        return res.status(409).json({ status: 409, message: "Lobby is already add. ", data: Data })
+                } else {
+                        const Data = await lobby.create(req.body);
+                        if (Data) {
+                                return res.status(200).json({ status: 200, message: "Lobby is add successfully. ", data: Data })
+                        }
+                }
+        } catch (err) {
+                console.log(err);
+                return res.status(501).send({ status: 501, message: "server error.", data: {}, });
+        }
+};
+exports.getLobbys = async (req, res) => {
+        const categories = await lobby.find({})
+        if (categories.length > 0) {
+                return res.status(201).json({ message: "Lobby Found", status: 200, data: categories, });
+        }
+        return res.status(201).json({ message: "Lobby not Found", status: 404, data: {}, });
+};
+exports.activeBlockLobby = async (req, res) => {
+        try {
+                const data = await lobby.findById(req.params.id)
+                if (!data) {
+                        return res.status(400).send({ msg: "not found" });
+                } else {
+                        if (data.status == "ACTIVE") {
+                                const update = await lobby.findByIdAndUpdate({ _id: data._id }, { $set: { status: "BLOCKED" } }, { new: true })
+                                return res.status(200).json({ status: 200, message: "Lobby block now.", data: update });
+                        } else {
+                                const update = await lobby.findByIdAndUpdate({ _id: data._id }, { $set: { status: "ACTIVE" } }, { new: true })
+                                return res.status(200).json({ status: 200, message: "Lobby active now.", data: update });
+                        }
+                }
+        } catch (err) {
+                return res.status(500).send({ msg: "internal server error ", error: err.message, });
+        }
+};
+exports.deleteLobby = async (req, res) => {
+        try {
+                const data = await lobby.findById(req.params.id);
+                if (!data) {
+                        return res.status(400).send({ msg: "not found" });
+                } else {
+                        const data1 = await lobby.findByIdAndDelete(data._id);
+                        return res.status(200).json({ status: 200, message: "Lobby delete successfully.", data: {} });
+                }
+        } catch (err) {
+                return res.status(500).send({ msg: "internal server error ", error: err.message, });
+        }
+};
+exports.createFaq = async (req, res) => {
+        const { question, answer } = req.body;
+        try {
+                if (!question || !answer) {
+                        return res.status(400).json({ message: "questions and answers cannot be blank " });
+                }
+                const faq = await Faq.create(req.body);
+                return res.status(200).json({ status: 200, message: "FAQ Added Successfully ", data: faq });
+        } catch (err) {
+                console.log(err);
+                return res.status(500).json({ message: "Error ", status: 500, data: err.message });
+        }
+};
+exports.getFaqById = async (req, res) => {
+        const { id } = req.params;
+        try {
+                const faq = await Faq.findById(id);
+                if (!faq) {
+                        return res.status(404).json({ status: 404, message: "No data found", data: {} });
+                }
+                return res.status(200).json({ status: 200, message: "faqs retrieved successfully ", data: faq });
+        } catch (err) {
+                console.log(err);
+                return res.status(501).send({ status: 501, message: "server error.", data: {}, });
+        }
+};
+exports.updateFaq = async (req, res) => {
+        const { id } = req.params;
+        try {
+                const faq = await Faq.findByIdAndUpdate(id, req.body, { new: true });
+                if (!faq) {
+                        return res.status(404).json({ status: 404, message: "No data found", data: {} });
+                }
+                return res.status(200).json({ status: 200, message: "update successfully.", data: faq });
+        } catch (err) {
+                console.log(err);
+                return res.status(500).json({ message: "Something went wrong ", status: 500, data: err.message });
+        }
+};
+exports.deleteFaq = async (req, res) => {
+        const { id } = req.params;
+        try {
+                const faq = await Faq.findByIdAndDelete(id);
+                if (!faq) {
+                        return res.status(404).json({ status: 404, message: "No data found", data: {} });
+                }
+                return res.status(200).json({ status: 200, message: "FAQ Deleted Successfully ", data: faq });
+        } catch (err) {
+                console.log(err);
+                return res.status(500).json({ message: "Something went wrong ", status: 500, data: err.message });
+        }
+};
+exports.getAllFaqs = async (req, res) => {
+        try {
+                const faqs = await Faq.find({}).lean();
+                if (faqs.length == 0) {
+                        return res.status(404).json({ status: 404, message: "No data found", data: {} });
+                }
+                return res.status(200).json({ status: 200, message: "faqs retrieved successfully ", data: faqs });
+        } catch (err) {
+                console.log(err);
+                return res.status(501).send({ status: 501, message: "server error.", data: {}, });
         }
 };
 const reffralCode = async () => {
