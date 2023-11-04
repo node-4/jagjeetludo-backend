@@ -20,7 +20,7 @@ app.get("/", (req, res) => {
 
 require('./routes/user.route')(app);
 require('./routes/admin.route')(app);
-
+require('./routes/static.route')(app);
 
 mongoose.Promise = global.Promise;
 mongoose.set("strictQuery", true);

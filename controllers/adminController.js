@@ -7,6 +7,7 @@ const helpDesk = require("../models/helpDesk");
 const howToPlay = require("../models/howPlay");
 const lobby = require("../models/lobby");
 const Faq = require('../models/faq')
+const storeModel = require("../models/store");
 
 exports.registration = async (req, res) => {
         const { mobileNumber, email } = req.body;
@@ -380,6 +381,93 @@ exports.getAllFaqs = async (req, res) => {
         } catch (err) {
                 console.log(err);
                 return res.status(501).send({ status: 501, message: "server error.", data: {}, });
+        }
+};
+exports.addStore = async (req, res) => {
+        try {
+                let findStore = await storeModel.findOne({ storeName: req.body.storeName });
+                if (findStore) {
+                        return res.status(409).send({ status: 409, message: "Already exit." });
+                } else {
+                        if (req.file) {
+                                req.body.storeImage = req.file.path
+                        } else {
+                                return res.status(404).json({ message: "First Chosse an image.", status: 404, data: {} });
+                        }
+                        let saveStore = await storeModel(req.body).save();
+                        if (saveStore) {
+                                return res.json({ status: 200, message: 'Store add successfully.', data: saveStore });
+                        }
+                }
+        } catch (error) {
+                console.error(error);
+                return res.status(500).send({ status: 500, message: "Server error" + error.message });
+        }
+};
+exports.viewStore = async (req, res) => {
+        try {
+                let findStore = await storeModel.findOne({ _id: req.params.id })
+                if (!findStore) {
+                        return res.status(404).send({ status: 404, message: "Data not found" });
+                } else {
+                        return res.json({ status: 200, message: 'Store found successfully.', data: findStore });
+                }
+        } catch (error) {
+                console.error(error);
+                return res.status(500).send({ status: 500, message: "Server error" + error.message });
+        }
+};
+exports.editStore = async (req, res) => {
+        try {
+                let findStore = await storeModel.findOne({ _id: req.params.id });
+                if (!findStore) {
+                        return res.status(404).send({ status: 404, message: "Data not found" });
+                } else {
+                        if (req.file) {
+                                req.body.storeImage = req.file.filename
+                        }
+                        let saveStore = await storeModel.findByIdAndUpdate({ _id: findStore._id }, { $set: req.body }, { new: true })
+                        if (saveStore) {
+                                return res.json({ status: 200, message: 'Store update successfully.', data: saveStore });
+                        }
+                }
+        } catch (error) {
+                console.error(error);
+                return res.status(500).send({ status: 500, message: "Server error" + error.message });
+        }
+};
+exports.deleteStore = async (req, res) => {
+        try {
+                let vendorData = await User.findOne({ _id: req.user._id });
+                if (!vendorData) {
+                        return res.status(404).send({ status: 404, message: "User not found" });
+                } else {
+                        let findStore = await storeModel.findOne({ _id: req.params.id });
+                        if (!findStore) {
+                                return res.status(404).send({ status: 404, message: "Data not found" });
+                        } else {
+                                let update = await storeModel.findByIdAndDelete({ _id: findStore._id });
+                                if (update) {
+                                        return res.json({ status: 200, message: 'Store Delete successfully.', data: findStore });
+                                }
+                        }
+                }
+        } catch (error) {
+                console.error(error);
+                return res.status(500).send({ status: 500, message: "Server error" + error.message });
+        }
+};
+exports.listStore = async (req, res) => {
+        try {
+                let findStore = await storeModel.find({});
+                if (findStore.length == 0) {
+                        return res.status(404).send({ status: 404, message: "Data not found" });
+                } else {
+                        return res.json({ status: 200, message: 'Store Data found successfully.', data: findStore });
+                }
+        } catch (error) {
+                console.error(error);
+                return res.status(500).send({ status: 500, message: "Server error" + error.message });
         }
 };
 const reffralCode = async () => {

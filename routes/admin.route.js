@@ -1,5 +1,6 @@
 const auth = require("../controllers/adminController");
 const authJwt = require("../middleware/authJwt");
+const { upload, FranchiseUpload, productUpload } = require('../middleware/imageupload')
 module.exports = (app) => {
         app.post("/api/v1/admin/registration", auth.registration);
         app.post("/api/v1/admin/signin", auth.signin);
@@ -27,4 +28,9 @@ module.exports = (app) => {
         app.delete("/api/v1/static/faq/:id", authJwt.verifyToken, auth.deleteFaq);
         app.get("/api/v1/static/faq/All", auth.getAllFaqs);
         app.get("/api/v1/static/faq/:id", auth.getFaqById); 
+        app.post("/api/v1/admin/Store/addStore", [authJwt.verifyToken], upload.single('image'), auth.addStore);
+        app.get("/api/v1/admin/listStore", auth.listStore);
+        app.get("/api/v1/admin/viewStore/:id", auth.viewStore);
+        app.put("/api/v1/admin/Store/editStore/:id", [authJwt.verifyToken], upload.single('image'), auth.editStore);
+        app.delete("/api/v1/admin/deleteStore/:id", [authJwt.verifyToken], auth.deleteStore);
 }
