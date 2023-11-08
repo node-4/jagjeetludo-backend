@@ -453,7 +453,7 @@ exports.dailyWinnerContestlist = async (req, res) => {
                 const dailyWinners = await contest.find({
                         winner: req.user._id,
                         createdAt: { $gte: currentDate },
-                });
+                }).populate('winner');
                 if (dailyWinners.length === 0) {
                         return res.status(404).json({ status: 404, message: 'Daily contest winners not found.' });
                 }
@@ -472,7 +472,7 @@ exports.weeklyWinnerContestlist = async (req, res) => {
                 const weeklyWinners = await contest.find({
                         winner: req.user._id,
                         createdAt: { $gte: lastWeekDate, $lte: currentDate },
-                });
+                }).populate('winner');
 
                 if (weeklyWinners.length === 0) {
                         return res.status(404).json({ status: 404, message: 'Weekly contest winners not found.' });
@@ -493,7 +493,7 @@ exports.monthlyWinnerContestlist = async (req, res) => {
                 const monthlyWinners = await contest.find({
                         winner: req.user._id,
                         createdAt: { $gte: lastMonthDate, $lte: currentDate },
-                });
+                }).populate('winner');
 
                 if (monthlyWinners.length === 0) {
                         return res.status(404).json({ status: 404, message: 'Monthly contest winners not found.' });
