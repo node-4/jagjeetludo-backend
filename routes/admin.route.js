@@ -27,10 +27,15 @@ module.exports = (app) => {
         app.put("/api/v1/static/faq/:id", authJwt.verifyToken, auth.updateFaq);
         app.delete("/api/v1/static/faq/:id", authJwt.verifyToken, auth.deleteFaq);
         app.get("/api/v1/static/faq/All", auth.getAllFaqs);
-        app.get("/api/v1/static/faq/:id", auth.getFaqById); 
+        app.get("/api/v1/static/faq/:id", auth.getFaqById);
         app.post("/api/v1/admin/Store/addStore", [authJwt.verifyToken], upload.single('image'), auth.addStore);
         app.get("/api/v1/admin/listStore", auth.listStore);
         app.get("/api/v1/admin/viewStore/:id", auth.viewStore);
         app.put("/api/v1/admin/Store/editStore/:id", [authJwt.verifyToken], upload.single('image'), auth.editStore);
         app.delete("/api/v1/admin/deleteStore/:id", [authJwt.verifyToken], auth.deleteStore);
+        app.post("/api/v1/Ads/addAds", [authJwt.verifyToken], upload.single('video'), auth.addAds);
+        app.get("/api/v1/getAds", auth.getAds);
+        app.get("/api/v1/getAdsforUser", [authJwt.verifyToken], auth.getAdsforUser);
+        app.get("/api/v1/viewAds/:id", auth.getAdsById);
+        app.delete("/api/v1/DeleteAds/:id", [authJwt.verifyToken], auth.DeleteAds);
 }

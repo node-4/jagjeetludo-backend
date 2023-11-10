@@ -8,7 +8,7 @@ const howToPlay = require("../models/howPlay");
 const lobby = require("../models/lobby");
 const Faq = require('../models/faq')
 const storeModel = require("../models/store");
-
+const ads = require("../models/ads");
 exports.registration = async (req, res) => {
         const { mobileNumber, email } = req.body;
         try {
@@ -468,6 +468,75 @@ exports.listStore = async (req, res) => {
         } catch (error) {
                 console.error(error);
                 return res.status(500).send({ status: 500, message: "Server error" + error.message });
+        }
+};
+exports.addAds = async (req, res) => {
+        try {
+                if (req.file) {
+                        req.body.video = req.file.path;
+                }
+                const data = {
+                        title: req.body.title,
+                        description: req.body.description,
+                        coins: req.body.coins,
+                        video: req.body.video
+                }
+                const Data = await ads.create(data);
+                return res.status(200).json({ status: 200, message: "Ads is Added ", data: Data })
+        } catch (err) {
+                console.log(err);
+                return res.status(501).send({ status: 501, message: "server error.", data: {}, });
+        }
+};
+exports.getAds = async (req, res) => {
+        try {
+                const Ads = await ads.find();
+                if (Ads.length == 0) {
+                        return res.status(404).json({ status: 404, message: "No data found", data: {} });
+                } else {
+                        return res.status(200).json({ status: 200, message: "All Ads Data found successfully.", data: Ads })
+                }
+        } catch (err) {
+                console.log(err);
+                return res.status(501).send({ status: 501, message: "server error.", data: {}, });
+        }
+};
+exports.getAdsById = async (req, res) => {
+        try {
+                const Ads = await ads.findById({ _id: req.params.id });
+                if (!Ads) {
+                        return res.status(404).json({ status: 404, message: "No data found", data: {} });
+                }
+                return res.status(200).json({ status: 200, message: "Data found successfully.", data: Ads })
+        } catch (err) {
+                console.log(err);
+                return res.status(501).send({ status: 501, message: "server error.", data: {}, });
+        }
+};
+exports.DeleteAds = async (req, res) => {
+        try {
+                const Ads = await ads.findById({ _id: req.params.id });
+                if (!Ads) {
+                        return res.status(404).json({ status: 404, message: "No data found", data: {} });
+                }
+                await ads.findByIdAndDelete({ _id: req.params.id });
+                return res.status(200).json({ status: 200, message: "Ads delete successfully.", data: {} })
+        } catch (err) {
+                console.log(err);
+                return res.status(501).send({ status: 501, message: "server error.", data: {}, });
+        }
+};
+exports.getAdsforUser = async (req, res) => {
+        try {
+                const Ads = await ads.find({ users: { $ne: [req.user._id] } });
+                if (Ads.length == 0) {
+                        return res.status(404).json({ status: 404, message: "No data found", data: {} });
+                } else {
+                        return res.status(200).json({ status: 200, message: "All Ads Data found successfully.", data: Ads })
+                }
+        } catch (err) {
+                console.log(err);
+                return res.status(501).send({ status: 501, message: "server error.", data: {}, });
         }
 };
 const reffralCode = async () => {
