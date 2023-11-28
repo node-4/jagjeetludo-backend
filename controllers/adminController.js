@@ -161,6 +161,12 @@ exports.deleteUser = async (req, res) => {
                 return res.status(500).send({ msg: "internal server error ", error: err.message, });
         }
 };
+
+
+
+
+
+
 exports.addBonusTouser = async (req, res) => {
         try {
                 const data = await User.findById(req.params.id)
