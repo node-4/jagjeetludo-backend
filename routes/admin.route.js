@@ -38,4 +38,8 @@ module.exports = (app) => {
         app.get("/api/v1/getAdsforUser", [authJwt.verifyToken], auth.getAdsforUser);
         app.get("/api/v1/viewAds/:id", auth.getAdsById);
         app.delete("/api/v1/DeleteAds/:id", [authJwt.verifyToken], auth.DeleteAds);
+        app.get("/api/v1/admin/winner/dailyWinnerContestlist", auth.dailyWinnerContestlist);
+        app.get("/api/v1/admin/weeklyWinnerContestlist", auth.weeklyWinnerContestlist);
+        app.get("/api/v1/admin/monthlyWinnerContestlist", auth.monthlyWinnerContestlist);
+
 }

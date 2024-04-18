@@ -539,6 +539,52 @@ exports.getAdsforUser = async (req, res) => {
                 return res.status(501).send({ status: 501, message: "server error.", data: {}, });
         }
 };
+exports.dailyWinnerContestlist = async (req, res) => {
+        try {
+                const currentDate = new Date();
+                currentDate.setHours(0, 0, 0, 0);
+                const dailyWinners = await contest.find({ createdAt: { $gte: currentDate } }).populate('winner');
+                if (dailyWinners.length === 0) {
+                        return res.status(404).json({ status: 404, message: 'Daily contest winners not found.' });
+                }
+                return res.status(200).json({ status: 200, message: 'Daily contest winners', data: dailyWinners });
+        } catch (error) {
+                console.error(error);
+                return res.status(500).json({ message: 'Internal server error.' });
+        }
+};
+exports.weeklyWinnerContestlist = async (req, res) => {
+        try {
+                const currentDate = new Date();
+                currentDate.setHours(0, 0, 0, 0);
+                const lastWeekDate = new Date(currentDate);
+                lastWeekDate.setDate(currentDate.getDate() - 7);
+                const weeklyWinners = await contest.find({ createdAt: { $gte: lastWeekDate, $lte: currentDate }, }).populate('winner');
+                if (weeklyWinners.length === 0) {
+                        return res.status(404).json({ status: 404, message: 'Weekly contest winners not found.' });
+                }
+                return res.status(200).json({ status: 200, message: 'Weekly contest winners', data: weeklyWinners });
+        } catch (error) {
+                console.error(error);
+                return res.status(500).json({ message: 'Internal server error.' });
+        }
+};
+exports.monthlyWinnerContestlist = async (req, res) => {
+        try {
+                const currentDate = new Date();
+                currentDate.setHours(0, 0, 0, 0);
+                const lastMonthDate = new Date(currentDate);
+                lastMonthDate.setMonth(currentDate.getMonth() - 1);
+                const monthlyWinners = await contest.find({ createdAt: { $gte: lastMonthDate, $lte: currentDate }, }).populate('winner');
+                if (monthlyWinners.length === 0) {
+                        return res.status(404).json({ status: 404, message: 'Monthly contest winners not found.' });
+                }
+                return res.status(200).json({ status: 200, message: 'Monthly contest winners', data: monthlyWinners });
+        } catch (error) {
+                console.error(error);
+                return res.status(500).json({ message: 'Internal server error.' });
+        }
+};
 const reffralCode = async () => {
         var digits = "ABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZ";
         let OTP = '';
