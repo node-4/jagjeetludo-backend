@@ -161,13 +161,19 @@ exports.deleteUser = async (req, res) => {
                 return res.status(500).send({ msg: "internal server error ", error: err.message, });
         }
 };
+
+
+
+
+
+
 exports.addBonusTouser = async (req, res) => {
         try {
                 const data = await User.findById(req.params.id)
                 if (!data) {
                         return res.status(400).send({ msg: "not found" });
                 } else {
-                        const update = await User.findByIdAndUpdate({ _id: data._id }, { $set: { bonus: data.bonus + req.body.bonus } }, { new: true })
+                        const update = await User.findByIdAndUpdate({ _id: data._id }, { $set: { bonus: data.bonus + Number(req.body.bonus) } }, { new: true })
                         return res.status(200).json({ status: 200, message: "Contest block now.", data: update });
                 }
         } catch (err) {
