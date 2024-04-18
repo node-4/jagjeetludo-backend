@@ -41,5 +41,7 @@ module.exports = (app) => {
         app.get("/api/v1/admin/winner/dailyWinnerContestlist", auth.dailyWinnerContestlist);
         app.get("/api/v1/admin/weeklyWinnerContestlist", auth.weeklyWinnerContestlist);
         app.get("/api/v1/admin/monthlyWinnerContestlist", auth.monthlyWinnerContestlist);
+        app.get("/api/v1/admin/transactionList", auth.transactionList);
+        app.get("/api/v1/admin/transaction/:id", auth.getTransactionById);
 
 }

@@ -9,6 +9,7 @@ const lobby = require("../models/lobby");
 const Faq = require('../models/faq')
 const storeModel = require("../models/store");
 const ads = require("../models/ads");
+const transactionModel = require("../models/transaction");
 exports.registration = async (req, res) => {
         const { mobileNumber, email } = req.body;
         try {
@@ -161,8 +162,33 @@ exports.deleteUser = async (req, res) => {
                 return res.status(500).send({ msg: "internal server error ", error: err.message, });
         }
 };
-
-
+exports.transactionList = async (req, res) => {
+        try {
+                const user = await userModel.findById({ _id: req.user._id });
+                if (!user) {
+                        return res.status(404).json({ status: 404, message: 'user not found.' });
+                }
+                const findContest = await transactionModel.find({}).populate('user');
+                if (findContest.length == 0) {
+                        return res.status(404).json({ status: 404, message: 'Transaction not found.', });
+                }
+                return res.status(200).json({ status: 200, message: 'Transaction data found.', data: findContest });
+        } catch (error) {
+                console.error(error);
+                res.status(500).json({ message: 'Internal server error.' });
+        }
+};
+exports.getTransactionById = async (req, res) => {
+        try {
+                const data = await transactionModel.findById(req.params.id).populate('user')
+                if (!data || data.length === 0) {
+                        return res.status(400).send({ msg: "not found" });
+                }
+                return res.status(200).json({ status: 200, message: "User data found.", data: data });
+        } catch (err) {
+                return res.status(500).send({ msg: "internal server error ", error: err.message, });
+        }
+};
 
 
 
