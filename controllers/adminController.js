@@ -10,6 +10,8 @@ const Faq = require('../models/faq')
 const storeModel = require("../models/store");
 const ads = require("../models/ads");
 const transactionModel = require("../models/transaction");
+const userModel = require("../models/userModel");
+const refferal = require("../models/refferal");
 exports.registration = async (req, res) => {
         const { mobileNumber, email } = req.body;
         try {
@@ -55,6 +57,42 @@ exports.signin = async (req, res) => {
         } catch (error) {
                 console.error(error);
                 return res.status(500).send({ message: "Server error" + error.message });
+        }
+};
+exports.getProfile = async (req, res) => {
+        try {
+                const user = await userModel.findById({ _id: req.user._id });
+                if (!user) {
+                        return res.status(404).json({ status: 404, message: 'user not found.' });
+                }
+                return res.status(200).json({ status: 200, message: 'User profile found..', data: user });
+        } catch (error) {
+                console.error(error);
+                res.status(500).json({ message: 'Internal server error.' });
+        }
+};
+exports.updateProfile = async (req, res) => {
+        try {
+                const user = await userModel.findById({ _id: req.user._id });
+                if (!user) {
+                        return res.status(404).json({ status: 404, message: 'user not found.' });
+                }
+                let obj = {
+                        firstName: req.body.firstName || user.firstName,
+                        lastName: req.body.lastName || user.lastName,
+                        mobileNumber: req.body.mobileNumber || user.mobileNumber,
+                        email: req.body.email || user.email,
+                        alternatemobileNumber: req.body.alternatemobileNumber || user.alternatemobileNumber,
+                        dob: req.body.dob || user.dob,
+                        gender: req.body.gender || user.gender,
+                        address: req.body.address || user.address,
+                        wallet: req.body.wallet || user.wallet,
+                }
+                let update = await userModel.findByIdAndUpdate({ _id: user._id }, { $set: obj }, { new: true })
+                return res.status(200).json({ status: 200, message: 'User profile found..', data: update });
+        } catch (error) {
+                console.error(error);
+                res.status(500).json({ message: 'Internal server error.' });
         }
 };
 exports.AddContest = async (req, res) => {
@@ -128,11 +166,33 @@ exports.deleteContest = async (req, res) => {
 };
 exports.userList = async (req, res) => {
         try {
-                const findContest = await User.find({ userType: "USER" });
+                if (req.query.socialType) {
+                        const findContest = await User.find({ socialType: req.query.socialType, userType: "USER" }).sort({ createdAt: -1 });
+                        if (findContest.length == 0) {
+                                return res.status(404).json({ status: 404, message: 'User not found.', });
+                        }
+                        return res.status(200).json({ status: 200, message: 'User data fetch sucessfully.', data: findContest });
+
+                } else {
+                        const findContest = await User.find({ userType: "USER" }).sort({ createdAt: -1 });
+                        if (findContest.length == 0) {
+                                return res.status(404).json({ status: 404, message: 'User not found.', });
+                        }
+                        return res.status(200).json({ status: 200, message: 'User data fetch sucessfully.', data: findContest });
+                }
+        } catch (error) {
+                console.error(error);
+                res.status(500).json({ message: 'Internal server error.' });
+        }
+};
+exports.guestUserList = async (req, res) => {
+        try {
+                const findContest = await User.find({ userType: "GUEST" });
                 if (findContest.length == 0) {
                         return res.status(404).json({ status: 404, message: 'User not found.', });
                 }
                 return res.status(200).json({ status: 200, message: 'User data fetch sucessfully.', data: findContest });
+
         } catch (error) {
                 console.error(error);
                 res.status(500).json({ message: 'Internal server error.' });
@@ -189,10 +249,18 @@ exports.getTransactionById = async (req, res) => {
                 return res.status(500).send({ msg: "internal server error ", error: err.message, });
         }
 };
-
-
-
-
+exports.refferalList = async (req, res) => {
+        try {
+                const findContest = await refferal.find({}).populate('user');
+                if (findContest.length == 0) {
+                        return res.status(404).json({ status: 404, message: 'Refferal not found.', });
+                }
+                return res.status(200).json({ status: 200, message: 'Refferal data found.', data: findContest });
+        } catch (error) {
+                console.error(error);
+                res.status(500).json({ message: 'Internal server error.' });
+        }
+};
 exports.addBonusTouser = async (req, res) => {
         try {
                 const data = await User.findById(req.params.id)
@@ -625,3 +693,46 @@ const reffralCode = async () => {
         }
         return OTP;
 }
+exports.dailyDeposittList = async (req, res) => {
+        try {
+                const currentDate = new Date();
+                currentDate.setHours(0, 0, 0, 0);
+                const dailyWinners = await transactionModel.find({ createdAt: { $gte: currentDate }, type: "Credit", relatedPayments: "AddMoney" }).populate('user');
+                if (dailyWinners.length === 0) {
+                        return res.status(404).json({ status: 404, message: 'Daily contest winners not found.' });
+                }
+                return res.status(200).json({ status: 200, message: 'Daily contest winners', data: dailyWinners });
+        } catch (error) {
+                console.error(error);
+                return res.status(500).json({ message: 'Internal server error.' });
+        }
+};
+exports.monthlyDepositelist = async (req, res) => {
+        try {
+                const currentDate = new Date();
+                currentDate.setHours(0, 0, 0, 0);
+                const lastMonthDate = new Date(currentDate);
+                lastMonthDate.setMonth(currentDate.getMonth() - 1);
+                const monthlyWinners = await transactionModel.find({ createdAt: { $gte: lastMonthDate, $lte: currentDate }, type: "Credit", relatedPayments: "AddMoney" }).populate('user');
+                if (monthlyWinners.length === 0) {
+                        return res.status(404).json({ status: 404, message: 'Monthly contest winners not found.' });
+                }
+
+                return res.status(200).json({ status: 200, message: 'Monthly contest winners', data: monthlyWinners });
+        } catch (error) {
+                console.error(error);
+                return res.status(500).json({ message: 'Internal server error.' });
+        }
+};
+exports.withdrawalList = async (req, res) => {
+        try {
+                const findContest = await transactionModel.find({ type: "Debit", relatedPayments: "Withdrall Money" }).populate('user').sort({ createdAt: -1 });
+                if (findContest.length == 0) {
+                        return res.status(404).json({ status: 404, message: 'Transaction not found.', });
+                }
+                return res.status(200).json({ status: 200, message: 'Transaction data found.', data: findContest });
+        } catch (error) {
+                console.error(error);
+                res.status(500).json({ message: 'Internal server error.' });
+        }
+};

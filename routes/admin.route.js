@@ -6,10 +6,14 @@ module.exports = (app) => {
         app.post("/api/v1/admin/signin", auth.signin);
         app.post("/api/v1/admin/AddContest", authJwt.verifyToken, auth.AddContest);
         app.get("/api/v1/admin/allContest", auth.getContests);
+        app.get("/api/v1/admin/getProfile", authJwt.verifyToken, auth.getProfile);
+        app.put("/api/v1/admin/updateProfile", authJwt.verifyToken, auth.updateProfile);
         app.put("/api/v1/admin/Contest/:id", authJwt.verifyToken, auth.activeBlockContest);
         app.get("/api/v1/admin/Contest/:id", auth.getIdContest);
         app.delete("/api/v1/admin/Contest/:id", [authJwt.verifyToken], auth.deleteContest);
         app.get("/api/v1/admin/userList", auth.userList);
+        app.get("/api/v1/admin/guestUserList", auth.guestUserList);
+        app.get("/api/v1/admin/refferalList", auth.refferalList);
         app.get("/api/v1/admin/User/:id", auth.getUserById);
         app.delete("/api/v1/admin/User/:id", [authJwt.verifyToken], auth.deleteUser);
         app.post("/api/v1/admin/addBonus/:id", [authJwt.verifyToken], auth.addBonusTouser);
@@ -43,5 +47,8 @@ module.exports = (app) => {
         app.get("/api/v1/admin/monthlyWinnerContestlist", auth.monthlyWinnerContestlist);
         app.get("/api/v1/admin/transactionList", auth.transactionList);
         app.get("/api/v1/admin/transaction/:id", auth.getTransactionById);
+        app.get("/api/v1/admin/monthlyDepositelist", auth.monthlyDepositelist);
+        app.get("/api/v1/admin/dailyDeposittList", auth.dailyDeposittList);
+        app.get("/api/v1/admin/withdrawalList", auth.withdrawalList);
 
 }

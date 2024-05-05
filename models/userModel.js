@@ -15,13 +15,26 @@ var userSchema = new schema({
                 type: String,
                 default: ""
         },
+        alternatemobileNumber: {
+                type: String,
+                default: ""
+        },
         email: {
                 type: String,
                 default: ""
         },
+        dob: {
+                type: Date,
+        },
         deviceToken: {
                 type: String,
                 default: ""
+        },
+        gender: {
+                type: String,
+        },
+        address: {
+                type: String,
         },
         refferalCode: { type: String, },
         refferalCodeUsed: { type: Boolean, default: false, },
