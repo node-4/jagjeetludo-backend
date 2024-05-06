@@ -7,7 +7,7 @@ module.exports = (app) => {
         app.post("/api/v1/admin/AddContest", authJwt.verifyToken, auth.AddContest);
         app.get("/api/v1/admin/allContest", auth.getContests);
         app.get("/api/v1/admin/getProfile", authJwt.verifyToken, auth.getProfile);
-        app.put("/api/v1/admin/updateProfile", authJwt.verifyToken, auth.updateProfile);
+        app.put("/api/v1/admin/updateProfile", authJwt.verifyToken, upload.single('image'), auth.updateProfile);
         app.put("/api/v1/admin/Contest/:id", authJwt.verifyToken, auth.activeBlockContest);
         app.get("/api/v1/admin/Contest/:id", auth.getIdContest);
         app.delete("/api/v1/admin/Contest/:id", [authJwt.verifyToken], auth.deleteContest);
@@ -50,5 +50,6 @@ module.exports = (app) => {
         app.get("/api/v1/admin/monthlyDepositelist", auth.monthlyDepositelist);
         app.get("/api/v1/admin/dailyDeposittList", auth.dailyDeposittList);
         app.get("/api/v1/admin/withdrawalList", auth.withdrawalList);
+        app.get("/api/v1/admin/bonusList", auth.bonusList);
 
 }

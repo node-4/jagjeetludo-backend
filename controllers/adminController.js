@@ -12,6 +12,7 @@ const ads = require("../models/ads");
 const transactionModel = require("../models/transaction");
 const userModel = require("../models/userModel");
 const refferal = require("../models/refferal");
+const bonus = require("../models/bonus");
 exports.registration = async (req, res) => {
         const { mobileNumber, email } = req.body;
         try {
@@ -77,6 +78,12 @@ exports.updateProfile = async (req, res) => {
                 if (!user) {
                         return res.status(404).json({ status: 404, message: 'user not found.' });
                 }
+                let profilePic;
+                if (req.file) {
+                        profilePic = req.file.path;
+                } else {
+                        profilePic = user.profilePic;
+                }
                 let obj = {
                         firstName: req.body.firstName || user.firstName,
                         lastName: req.body.lastName || user.lastName,
@@ -87,6 +94,7 @@ exports.updateProfile = async (req, res) => {
                         gender: req.body.gender || user.gender,
                         address: req.body.address || user.address,
                         wallet: req.body.wallet || user.wallet,
+                        profilePic: profilePic,
                 }
                 let update = await userModel.findByIdAndUpdate({ _id: user._id }, { $set: obj }, { new: true })
                 return res.status(200).json({ status: 200, message: 'User profile found..', data: update });
@@ -267,11 +275,30 @@ exports.addBonusTouser = async (req, res) => {
                 if (!data) {
                         return res.status(400).send({ msg: "not found" });
                 } else {
-                        const update = await User.findByIdAndUpdate({ _id: data._id }, { $set: { bonus: data.bonus + Number(req.body.bonus) } }, { new: true })
-                        return res.status(200).json({ status: 200, message: "Contest block now.", data: update });
+                        const update = await User.findByIdAndUpdate({ _id: data._id }, { $set: { bonus: data.bonus + Number(req.body.bonus) } }, { new: true });
+                        if (update) {
+                                let obj = {
+                                        user: data._id,
+                                        amount: Number(req.body.bonus),
+                                }
+                                const Data = await bonus.create(obj);
+                                return res.status(200).json({ status: 200, message: "Contest block now.", data: update });
+                        }
                 }
         } catch (err) {
                 return res.status(500).send({ msg: "internal server error ", error: err.message, });
+        }
+};
+exports.bonusList = async (req, res) => {
+        try {
+                const findContest = await bonus.find({}).populate('user');
+                if (findContest.length == 0) {
+                        return res.status(404).json({ status: 404, message: 'Bonus not found.', });
+                }
+                return res.status(200).json({ status: 200, message: 'Bonus data found.', data: findContest });
+        } catch (error) {
+                console.error(error);
+                res.status(500).json({ message: 'Internal server error.' });
         }
 };
 exports.AddHowToPlay = async (req, res) => {

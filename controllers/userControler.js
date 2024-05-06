@@ -119,7 +119,7 @@ exports.joinContest = async (req, res) => {
                 }
                 user.deposite -= findContest.entryFee;
                 await user.save();
-                let findRefferal = await refferal.findOne({ user: findUser.refferUserId });
+                let findRefferal = await refferal.findOne({ user: user.refferUserId });
                 if (findRefferal) {
                         await refferal.findByIdAndUpdate({ _id: findRefferal._id }, { $set: { amount: findRefferal.amount + findContest.entryFee } }, { new: true });
                 }
@@ -289,7 +289,7 @@ exports.removeMoney = async (req, res) => {
         try {
                 const data = await userModel.findOne({ _id: req.user._id, });
                 if (data) {
-                        let update = await userModel.findByIdAndUpdate({ _id: data._id }, { $set: { deposite: data.deposite -parseInt(req.body.balance) } }, { new: true });
+                        let update = await userModel.findByIdAndUpdate({ _id: data._id }, { $set: { deposite: data.deposite - parseInt(req.body.balance), withdraw: data.withdraw + parseInt(req.body.balance) } }, { new: true });
                         if (update) {
                                 let obj = {
                                         user: req.user._id,
@@ -392,9 +392,11 @@ exports.updateLanguage = async (req, res) => {
 };
 exports.usedRefferCode = async (req, res) => {
         try {
+                console.log(req.user._id)
                 let findUser1 = await userModel.findOne({ _id: req.user._id, });
                 if (findUser1) {
-                        if (findUser1.refferalCodeUsed == true) {
+                        console.log(findUser1)
+                        if (!findUser1.refferalCodeUsed) {
                                 const findUser = await userModel.findOne({ refferalCode: req.body.refferalCode });
                                 if (findUser) {
                                         req.body.refferUserId = findUser._id;

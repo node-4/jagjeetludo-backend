@@ -79,6 +79,10 @@ var userSchema = new schema({
                 type: Number,
                 default: 0,
         },
+        withdraw: {
+                type: Number,
+                default: 0,
+        },
         winning: {
                 type: Number,
                 default: 0,
@@ -100,7 +104,7 @@ var userSchema = new schema({
         },
         userType: {
                 type: String,
-                enum: ["USER", "ADMIN","GUEST",],
+                enum: ["USER", "ADMIN", "GUEST",],
                 default: "USER"
         },
 },
